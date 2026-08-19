@@ -31,6 +31,7 @@ export default function BoostCompanion() {
   const [narrow, setNarrow] = useState(false);
   const [shortView, setShortView] = useState(false);
   const [past, setPast] = useState(false);
+  const [footerLift, setFooterLift] = useState(0);
   const [quip, setQuip] = useState<Quip>(DEFAULT_QUIP);
   const [quipOn, setQuipOn] = useState(true);
   const [ouch, setOuch] = useState(false);
@@ -61,14 +62,30 @@ export default function BoostCompanion() {
     const onScroll = () => {
       const p = window.scrollY > Math.max(240, window.innerHeight * 0.62);
       setPast((prev) => (prev === p ? prev : p));
+
+      // Keep the floating cluster from ever sitting on top of the footer:
+      // its "distance from the viewport bottom" needs to grow to at least
+      // (viewport height − footer's top), otherwise the element's own
+      // bottom edge dips below the footer's top edge and overlaps it.
+      const footer = document.querySelector("footer");
+      if (footer) {
+        const baseBottom = mq.matches ? 78 : 26;
+        const buffer = 16;
+        const footerTop = footer.getBoundingClientRect().top;
+        const requiredBottom = window.innerHeight - footerTop + buffer;
+        const lift = Math.max(0, requiredBottom - baseBottom);
+        setFooterLift((prev) => (Math.abs(prev - lift) > 1 ? lift : prev));
+      }
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
 
     return () => {
       mq.removeEventListener?.("change", onMq);
       sq.removeEventListener?.("change", onSq);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
     };
   }, []);
 
@@ -184,7 +201,9 @@ export default function BoostCompanion() {
   const bubbleVisible = quipOn && (!shortView || ouch);
   const bubbleHidden = shortView && !ouch;
   const iconSize = narrow ? 56 : 74;
-  const bottomOffset = narrow ? "calc(78px + env(safe-area-inset-bottom))" : "26px";
+  const bottomOffset = narrow
+    ? `calc(78px + env(safe-area-inset-bottom) + ${footerLift}px)`
+    : `calc(26px + ${footerLift}px)`;
 
   const origin = pathname === "/managed" ? "managed" : pathname === "/self" ? "self" : "contact";
   const waCurrent = waForOrigin(origin);
