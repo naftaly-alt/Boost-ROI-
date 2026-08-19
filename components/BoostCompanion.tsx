@@ -44,6 +44,7 @@ export default function BoostCompanion() {
   const ouchTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const acRef = useRef<AudioContext | null>(null);
   const ouchRef = useRef(false);
+  const clusterRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     ouchRef.current = ouch;
@@ -59,33 +60,70 @@ export default function BoostCompanion() {
     mq.addEventListener?.("change", onMq);
     sq.addEventListener?.("change", onSq);
 
+    // Keep the floating cluster (icon + speech bubble) and the WhatsApp
+    // button from ever sitting on top of anything clickable — the footer,
+    // or whatever CTA/links a page happens to end with right above it.
+    // Self-correcting: each tick, measure where they actually rendered
+    // (at the *previous* lift) and nudge up by however much they still
+    // overlap something real; ease back down when nothing overlaps, so it
+    // never needs to know in advance what any given page looks like.
+    const GAP = 12;
+    const MAX_LIFT = 320;
+    const adjustLift = () => {
+      const cluster = clusterRef.current;
+      const wa = document.querySelector('a[aria-label="דברו איתי בוואטסאפ"]');
+      if (!cluster) return;
+      const footer = document.querySelector("footer");
+      const others = Array.from(document.querySelectorAll<HTMLElement>("a, button")).filter(
+        (el) => el !== wa && !cluster.contains(el)
+      );
+      const rects = [cluster.getBoundingClientRect()];
+      if (wa) rects.push(wa.getBoundingClientRect());
+
+      let needed = 0;
+      for (const rect of rects) {
+        if (rect.width === 0 && rect.height === 0) continue;
+        if (footer) {
+          const ft = footer.getBoundingClientRect().top;
+          if (rect.bottom > ft) needed = Math.max(needed, rect.bottom - ft + GAP);
+        }
+        for (const el of others) {
+          const er = el.getBoundingClientRect();
+          if (er.width === 0 || er.height === 0) continue;
+          if (er.bottom < 0 || er.top > window.innerHeight) continue;
+          // Only react to obstacles at/below our own top edge. An obstacle
+          // *above* us (e.g. the sticky header, once lift has pushed us far
+          // enough up to reach it) must never trigger *more* lift — that
+          // would only push us further into it, runaway-style.
+          if (er.top < rect.top) continue;
+          const overlapsH = rect.right > er.left && rect.left < er.right;
+          const overlapsV = rect.bottom > er.top && rect.top < er.bottom;
+          if (overlapsH && overlapsV) needed = Math.max(needed, rect.bottom - er.top + GAP);
+        }
+      }
+
+      setFooterLift((prev) => {
+        if (needed > 0) return Math.min(MAX_LIFT, prev + needed);
+        return Math.max(0, prev - 10); // ease back down when clear
+      });
+    };
+
     const onScroll = () => {
       const p = window.scrollY > Math.max(240, window.innerHeight * 0.62);
       setPast((prev) => (prev === p ? prev : p));
-
-      // Keep the floating cluster from ever sitting on top of the footer:
-      // its "distance from the viewport bottom" needs to grow to at least
-      // (viewport height − footer's top), otherwise the element's own
-      // bottom edge dips below the footer's top edge and overlaps it.
-      const footer = document.querySelector("footer");
-      if (footer) {
-        const baseBottom = mq.matches ? 78 : 26;
-        const buffer = 16;
-        const footerTop = footer.getBoundingClientRect().top;
-        const requiredBottom = window.innerHeight - footerTop + buffer;
-        const lift = Math.max(0, requiredBottom - baseBottom);
-        setFooterLift((prev) => (Math.abs(prev - lift) > 1 ? lift : prev));
-      }
+      adjustLift();
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    const liftInterval = setInterval(adjustLift, 250);
 
     return () => {
       mq.removeEventListener?.("change", onMq);
       sq.removeEventListener?.("change", onSq);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      clearInterval(liftInterval);
     };
   }, []);
 
@@ -213,6 +251,7 @@ export default function BoostCompanion() {
   return (
     <>
       <div
+        ref={clusterRef}
         className="pointer-events-none fixed left-[14px] z-[88] flex max-w-[min(220px,52vw)] items-end gap-2 min-[901px]:left-[26px] min-[901px]:max-w-[min(340px,34vw)] min-[901px]:gap-3"
         style={{ bottom: bottomOffset }}
       >
