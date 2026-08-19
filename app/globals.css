@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    direction: rtl;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: #0e1112;
+    color: #f4f2ed;
+    -webkit-font-smoothing: antialiased;
+    text-wrap: pretty;
+    overflow-x: hidden;
+  }
+  a {
+    color: #c8ff4d;
+    text-decoration: none;
+  }
+  a:hover {
+    color: #dcff86;
+  }
+  ::selection {
+    background: #c8ff4d;
+    color: #0e1112;
+  }
+  input,
+  textarea,
+  button,
+  select {
+    font-family: inherit;
+  }
+  :focus-visible {
+    outline: 2px solid #c8ff4d;
+    outline-offset: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
