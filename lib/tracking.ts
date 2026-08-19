@@ -42,20 +42,41 @@ export function captureUtm(search: string): UtmParams {
   return {};
 }
 
+// The pixel base script loads via next/script strategy="afterInteractive", which
+// runs very early but isn't guaranteed to beat every component's own mount effect.
+// Rather than silently dropping a call when window.fbq isn't defined yet, wait
+// briefly for it to appear (it's defined synchronously as soon as the base
+// script's inline code runs, well before the actual fbevents.js file loads).
+function whenFbqReady(fn: () => void) {
+  if (typeof window === "undefined") return;
+  if (window.fbq) {
+    fn();
+    return;
+  }
+  let attempts = 0;
+  const id = setInterval(() => {
+    attempts += 1;
+    if (window.fbq) {
+      clearInterval(id);
+      fn();
+    } else if (attempts > 40) {
+      clearInterval(id);
+    }
+  }, 50);
+}
+
 export function trackCustom(name: string, params: Record<string, unknown> = {}) {
   if (typeof window === "undefined") return;
   const utm = captureUtm(window.location.search);
-  if (window.fbq) window.fbq("trackCustom", name, { ...params, ...utm });
+  whenFbqReady(() => window.fbq?.("trackCustom", name, { ...params, ...utm }));
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ event: name, ...params, ...utm });
 }
 
 export function pageView() {
-  if (typeof window !== "undefined" && window.fbq) window.fbq("track", "PageView");
+  whenFbqReady(() => window.fbq?.("track", "PageView"));
 }
 
 export function trackLead(contentName: string) {
-  if (typeof window !== "undefined" && window.fbq) {
-    window.fbq("track", "Lead", { content_name: contentName });
-  }
+  whenFbqReady(() => window.fbq?.("track", "Lead", { content_name: contentName }));
 }
