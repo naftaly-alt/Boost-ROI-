@@ -133,20 +133,29 @@ export default function BoostCompanion() {
       const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AC) return;
       const ac = (acRef.current = acRef.current || new AC());
-      if (ac.state === "suspended") ac.resume();
-      const t = ac.currentTime;
-      const o = ac.createOscillator();
-      const g = ac.createGain();
-      o.type = "triangle";
-      o.frequency.setValueAtTime(560, t);
-      o.frequency.exponentialRampToValueAtTime(190, t + 0.16);
-      o.frequency.exponentialRampToValueAtTime(320, t + 0.3);
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.22, t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
-      o.connect(g).connect(ac.destination);
-      o.start(t);
-      o.stop(t + 0.36);
+      const fire = () => {
+        try {
+          const t = ac.currentTime;
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.type = "triangle";
+          o.frequency.setValueAtTime(560, t);
+          o.frequency.exponentialRampToValueAtTime(190, t + 0.16);
+          o.frequency.exponentialRampToValueAtTime(320, t + 0.3);
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.22, t + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+          o.connect(g).connect(ac.destination);
+          o.start(t);
+          o.stop(t + 0.36);
+        } catch {
+          /* audio blocked — the squash still plays */
+        }
+      };
+      // Mobile browsers create/suspend the context until a gesture resumes it;
+      // scheduling a node before resume() resolves gets silently dropped there.
+      if (ac.state === "suspended") ac.resume().then(fire).catch(() => {});
+      else fire();
     } catch {
       /* audio blocked — the squash still plays */
     }

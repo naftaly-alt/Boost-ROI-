@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-export const META_PIXEL_ID = "1392439888385913";
+export { META_PIXEL_ID } from "./meta";
 
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
 export type UtmParams = Partial<Record<(typeof UTM_KEYS)[number], string>>;

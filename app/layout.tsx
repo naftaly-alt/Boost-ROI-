@@ -8,8 +8,7 @@ import BoostCompanion from "@/components/BoostCompanion";
 import ScrollProgress from "@/components/ScrollProgress";
 import PixelRouteTracker from "@/components/PixelRouteTracker";
 import AccessibilityWidget from "@/components/AccessibilityWidget";
-import { SITE_TITLE, SITE_DESCRIPTION } from "@/lib/meta";
-import { META_PIXEL_ID } from "@/lib/tracking";
+import { SITE_TITLE, SITE_DESCRIPTION, META_PIXEL_ID } from "@/lib/meta";
 
 const assistant = Assistant({
   subsets: ["latin", "hebrew"],
@@ -50,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="relative min-h-screen bg-ink font-body text-paper">
         <Script
           id="meta-pixel"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               !function(f,b,e,v,n,t,s)
@@ -66,6 +65,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `,
           }}
         />
+        <noscript>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            height={1}
+            width={1}
+            style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
         <PixelRouteTracker />
         <ScrollProgress />
         <Header />

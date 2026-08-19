@@ -1,3 +1,9 @@
+// Plain constant (no "use client") so Server Components can interpolate it
+// directly — importing it from a "use client" module instead turns it into
+// an opaque client-reference object across the server/client boundary,
+// which stringifies to "[object Object]" when interpolated.
+export const META_PIXEL_ID = "1392439888385913";
+
 export const SITE_TITLE = "נפתלי כהן | Boost ROI";
 export const SITE_DESCRIPTION =
   "נפתלי כהן, Performance Marketing. שתי דרכים לעבוד איתי: ניהול שיווק לחברות, או ליווי לעצמאים שרוצים לנהל את הקמפיינים שלהם בעצמם.";
