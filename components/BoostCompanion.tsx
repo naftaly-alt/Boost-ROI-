@@ -32,6 +32,7 @@ export default function BoostCompanion() {
   const [shortView, setShortView] = useState(false);
   const [past, setPast] = useState(false);
   const [footerLift, setFooterLift] = useState(0);
+  const [nearBottom, setNearBottom] = useState(false);
   const [quip, setQuip] = useState<Quip>(DEFAULT_QUIP);
   const [quipOn, setQuipOn] = useState(true);
   const [ouch, setOuch] = useState(false);
@@ -60,52 +61,69 @@ export default function BoostCompanion() {
     mq.addEventListener?.("change", onMq);
     sq.addEventListener?.("change", onSq);
 
-    // Keep the floating cluster (icon + speech bubble) and the WhatsApp
-    // button from ever sitting on top of anything clickable — the footer,
-    // or whatever CTA/links a page happens to end with right above it.
-    // Self-correcting: each tick, measure where they actually rendered
-    // (at the *previous* lift) and nudge up by however much they still
-    // overlap something real; ease back down when nothing overlaps, so it
-    // never needs to know in advance what any given page looks like.
-    const GAP = 12;
-    const MAX_LIFT = 320;
+    // Only within reach of the *very bottom* of the page, lift the floating
+    // cluster and drop its speech bubble (whose text-driven height is the
+    // one genuinely unpredictable variable) so it becomes a small fixed-size
+    // icon lifted by a fixed, generous amount above the footer — enough to
+    // also clear whatever CTA row a page happens to end with right above
+    // it. Everywhere else it sits at its normal resting spot; this must
+    // never engage just because it happens to overlap some random mid-page
+    // link while scrolling past, only right at the true bottom of the page.
+    const NEAR_BOTTOM_ZONE = 200;
     const adjustLift = () => {
-      const cluster = clusterRef.current;
-      const wa = document.querySelector('a[aria-label="דברו איתי בוואטסאפ"]');
-      if (!cluster) return;
-      const footer = document.querySelector("footer");
-      const others = Array.from(document.querySelectorAll<HTMLElement>("a, button")).filter(
-        (el) => el !== wa && !cluster.contains(el)
-      );
-      const rects = [cluster.getBoundingClientRect()];
-      if (wa) rects.push(wa.getBoundingClientRect());
+      const doc = document.documentElement;
+      const distanceFromBottom = doc.scrollHeight - (window.scrollY + window.innerHeight);
+      const nb = distanceFromBottom <= NEAR_BOTTOM_ZONE;
+      setNearBottom((prev) => (prev === nb ? prev : nb));
 
-      let needed = 0;
-      for (const rect of rects) {
-        if (rect.width === 0 && rect.height === 0) continue;
-        if (footer) {
-          const ft = footer.getBoundingClientRect().top;
-          if (rect.bottom > ft) needed = Math.max(needed, rect.bottom - ft + GAP);
-        }
-        for (const el of others) {
-          const er = el.getBoundingClientRect();
-          if (er.width === 0 || er.height === 0) continue;
-          if (er.bottom < 0 || er.top > window.innerHeight) continue;
-          // Only react to obstacles at/below our own top edge. An obstacle
-          // *above* us (e.g. the sticky header, once lift has pushed us far
-          // enough up to reach it) must never trigger *more* lift — that
-          // would only push us further into it, runaway-style.
-          if (er.top < rect.top) continue;
-          const overlapsH = rect.right > er.left && rect.left < er.right;
-          const overlapsV = rect.bottom > er.top && rect.top < er.bottom;
-          if (overlapsH && overlapsV) needed = Math.max(needed, rect.bottom - er.top + GAP);
-        }
+      if (!nb) {
+        setFooterLift((prev) => (prev === 0 ? prev : 0));
+        return;
+      }
+      const footer = document.querySelector("footer");
+      if (!footer) return;
+      // Extra clearance above the footer's top edge, generous enough for
+      // typical footer content on its own.
+      const buffer = mq.matches ? 40 : 30;
+      const baseBottom = mq.matches ? 78 : 26;
+      const footerTop = footer.getBoundingClientRect().top;
+      let requiredBottom = window.innerHeight - footerTop + buffer;
+
+      // Some pages end with a CTA row sitting right above the footer
+      // (e.g. the homepage's path-selector buttons, or a tall lead form
+      // on /managed). Only within this near-bottom zone, and only for
+      // elements actually sitting in the icons' own columns, also clear
+      // that element. Restricting by column (rather than reacting to any
+      // interactive element anywhere near the bottom of a tall form) is
+      // what avoids the runaway feedback loop seen in earlier attempts.
+      const margin = mq.matches ? 24 : 18;
+      const leftZoneMax = mq.matches ? 240 : 380;
+      const rightZoneMin = window.innerWidth - (mq.matches ? 90 : 110);
+      // Only a CTA/submit row genuinely adjacent to the footer should ever
+      // count — bounding how far above the footer we look is what keeps
+      // this from reacting to the sticky header or an accessibility tab
+      // sitting much higher up the page (the earlier runaway bug).
+      const scanFrom = footerTop - 220;
+      const candidates = Array.from(document.querySelectorAll<HTMLElement>("a, button"));
+      for (const el of candidates) {
+        if (footer.contains(el)) continue;
+        if (el.getAttribute("aria-label") === "Boost") continue;
+        if (el.getAttribute("aria-label") === "דברו איתי בוואטסאפ") continue;
+        if (el.getAttribute("aria-label") === "פתיחת תפריט נגישות") continue;
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) continue;
+        if (r.bottom <= 0 || r.top >= window.innerHeight) continue;
+        if (r.top < scanFrom) continue;
+        if (r.top >= footerTop) continue;
+        const inLeftZone = r.left < leftZoneMax;
+        const inRightZone = r.right > rightZoneMin;
+        if (!inLeftZone && !inRightZone) continue;
+        const need = window.innerHeight - r.top + margin;
+        if (need > requiredBottom) requiredBottom = need;
       }
 
-      setFooterLift((prev) => {
-        if (needed > 0) return Math.min(MAX_LIFT, prev + needed);
-        return Math.max(0, prev - 10); // ease back down when clear
-      });
+      const lift = Math.max(0, requiredBottom - baseBottom);
+      setFooterLift((prev) => (Math.abs(prev - lift) > 1 ? lift : prev));
     };
 
     const onScroll = () => {
@@ -116,14 +134,12 @@ export default function BoostCompanion() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
-    const liftInterval = setInterval(adjustLift, 250);
 
     return () => {
       mq.removeEventListener?.("change", onMq);
       sq.removeEventListener?.("change", onSq);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
-      clearInterval(liftInterval);
     };
   }, []);
 
@@ -237,11 +253,19 @@ export default function BoostCompanion() {
 
   const showCompanion = past;
   const bubbleVisible = quipOn && (!shortView || ouch);
-  const bubbleHidden = shortView && !ouch;
+  const bubbleHidden = (shortView && !ouch) || (nearBottom && !ouch);
   const iconSize = narrow ? 56 : 74;
   const bottomOffset = narrow
     ? `calc(78px + env(safe-area-inset-bottom) + ${footerLift}px)`
     : `calc(26px + ${footerLift}px)`;
+  // The accessibility tab is fixed at the vertical center of the viewport
+  // (regardless of scroll), so once Boost lifts high enough near the end
+  // of a page to clear a CTA row it can rise into that same band. Rather
+  // than lifting even further (chasing it up the page), shift Boost past
+  // the tab horizontally — the tab is a narrow strip pinned to the very
+  // left edge, so a modest offset clears it without affecting layout
+  // anywhere else.
+  const clusterLeft = footerLift > 0 ? "64px" : narrow ? "14px" : "26px";
 
   const origin = pathname === "/managed" ? "managed" : pathname === "/self" ? "self" : "contact";
   const waCurrent = waForOrigin(origin);
@@ -252,8 +276,8 @@ export default function BoostCompanion() {
     <>
       <div
         ref={clusterRef}
-        className="pointer-events-none fixed left-[14px] z-[88] flex max-w-[min(220px,52vw)] items-end gap-2 min-[901px]:left-[26px] min-[901px]:max-w-[min(340px,34vw)] min-[901px]:gap-3"
-        style={{ bottom: bottomOffset }}
+        className="pointer-events-none fixed z-[88] flex max-w-[min(220px,52vw)] items-end gap-2 min-[901px]:max-w-[min(340px,34vw)] min-[901px]:gap-3"
+        style={{ bottom: bottomOffset, left: clusterLeft }}
       >
         <button
           type="button"
