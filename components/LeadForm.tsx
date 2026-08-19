@@ -8,28 +8,22 @@ import { GOAL_LABELS, BUDGET_LABELS } from "@/lib/content";
 import { trackCustom, captureUtm } from "@/lib/tracking";
 import { waForOrigin, type Origin } from "@/lib/whatsapp";
 
-const COPY: Record<
-  Origin,
-  { headline: string; sub: string; bizLabel: string; noteLabel: string; boostMode: BoostMode }
-> = {
+const COPY: Record<Origin, { headline: string; sub: string; noteLabel: string; boostMode: BoostMode }> = {
   managed: {
     headline: "אולי הגיע הזמן שמישהו יחזיק את זה באמת.",
     sub: "טופס קצר לסינון הדדי. אם יש התאמה – נקבע שיחה ונדבר על מה שאפשר לשפר.",
-    bizLabel: "שם החברה",
     noteLabel: "מה הייתם רוצים לשפר?",
     boostMode: "pointing",
   },
   self: {
     headline: "לא מבטיח שזה תמיד יהיה כיף. אבל תדעו לאן הכסף הולך.",
     sub: "תשאירו פרטים ואחזור אליכם להבין מה אתם מנהלים היום ואיפה אפשר להיכנס.",
-    bizLabel: "שם העסק",
     noteLabel: "מה אתם מנהלים היום?",
     boostMode: "learning",
   },
   contact: {
     headline: "ספרו לי בקצרה על העסק.",
     sub: "שלוש דקות, ואני חוזר אליכם באופן אישי.",
-    bizLabel: "שם העסק",
     noteLabel: "משהו שכדאי שאדע?",
     boostMode: "pointing",
   },
@@ -46,14 +40,12 @@ const LEAD_ENDPOINT = "https://formsubmit.co/ajax/naftaly@boostroi.co.il";
 type FormState = {
   name: string;
   phone: string;
-  biz: string;
-  link: string;
   goal: string;
   budget: string;
   note: string;
 };
 
-const EMPTY_FORM: FormState = { name: "", phone: "", biz: "", link: "", goal: "", budget: "", note: "" };
+const EMPTY_FORM: FormState = { name: "", phone: "", goal: "", budget: "", note: "" };
 
 export default function LeadForm({ origin }: { origin: Origin }) {
   const router = useRouter();
@@ -84,8 +76,6 @@ export default function LeadForm({ origin }: { origin: Origin }) {
       _subject: "ליד חדש מהאתר · " + routeName,
       שם: form.name,
       טלפון: form.phone,
-      "עסק / חברה": form.biz || "—",
-      "אתר / Instagram": form.link || "—",
       "מה מחפשים": form.goal || routeName,
       "תקציב חודשי": form.budget || "—",
       הערות: form.note || "—",
@@ -177,29 +167,6 @@ export default function LeadForm({ origin }: { origin: Origin }) {
               className={fieldClass}
             />
             {errors.phone && <span className="text-[13.5px] text-error">{errors.phone}</span>}
-          </label>
-
-          <label className="flex flex-col gap-[7px]">
-            <span className="text-sm font-semibold">{copy.bizLabel}</span>
-            <input
-              type="text"
-              placeholder="איך קוראים לעסק"
-              value={form.biz}
-              onChange={(e) => set("biz", e.target.value)}
-              className={fieldClass}
-            />
-          </label>
-
-          <label className="flex flex-col gap-[7px]">
-            <span className="text-sm font-semibold">אתר / Instagram</span>
-            <input
-              type="text"
-              dir="ltr"
-              placeholder="example.com / @username"
-              value={form.link}
-              onChange={(e) => set("link", e.target.value)}
-              className={fieldClass + " text-left"}
-            />
           </label>
 
           {origin === "contact" && (

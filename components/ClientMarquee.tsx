@@ -8,10 +8,15 @@ export default function ClientMarquee() {
   const loop = [...CLIENT_LOGOS, ...CLIENT_LOGOS];
 
   return (
-    <div onMouseEnter={() => setRunning(false)} onMouseLeave={() => setRunning(true)} className="overflow-hidden py-1">
+    <div
+      dir="ltr"
+      onMouseEnter={() => setRunning(false)}
+      onMouseLeave={() => setRunning(true)}
+      className="overflow-hidden py-1"
+    >
       <div
         className="flex w-max animate-mleft gap-[14px]"
-        style={{ animationPlayState: running ? "running" : "paused" }}
+        style={{ animationPlayState: running ? "running" : "paused", animationDuration: "34s" }}
       >
         {loop.map((c, i) => (
           <div
@@ -22,7 +27,8 @@ export default function ClientMarquee() {
             <img
               src={c.src}
               alt={c.alt}
-              loading="lazy"
+              loading="eager"
+              decoding="async"
               className="h-full w-full object-contain opacity-[.96] transition-opacity duration-300"
             />
           </div>

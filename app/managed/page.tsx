@@ -26,7 +26,7 @@ export default function ManagedPage() {
           </div>
           <h1 className="mt-[clamp(14px,2vw,22px)] max-w-[16em] font-display text-[clamp(36px,8vw,104px)] font-extrabold leading-[.94] tracking-[-.042em]">
             <span className="block animate-rise">אתם מנהלים את העסק.</span>
-            <span className="block animate-rise text-lime [animation-delay:.12s]">אני מנהל את ה-Performance.</span>
+            <span className="block animate-rise text-lime [animation-delay:.12s]">אני מנהל את ה‑Performance.</span>
           </h1>
           <div className="mt-[clamp(20px,3vw,32px)] flex animate-rise flex-wrap items-center gap-5 [animation-delay:.24s]">
             <p className="m-0 max-w-[32em] text-[clamp(16px,1.9vw,19px)] leading-[1.8] text-paper/70">
@@ -132,7 +132,7 @@ export default function ManagedPage() {
               מי שמוכר לכם הוא גם מי שעובד על העסק.
             </h2>
             <p className="mt-5 text-[17px] leading-[1.85] text-[#4A4E52]">
-              אין כאן Account Manager שמעביר אתכם ל-Junior. אני עובד ישירות מול בעלי העסק, ההנהלה וצוותי השיווק והמכירות.
+              אין כאן Account Manager שמעביר אתכם ל‑Junior. אני עובד ישירות מול בעלי העסק, ההנהלה וצוותי השיווק והמכירות.
             </p>
             <p className="mt-4 text-[17px] leading-[1.85] text-[#4A4E52]">
               אני מעדיף לעבוד עם מספר מוגבל של עסקים ולהכיר אותם לעומק. גם העברתי סדנאות לבעלי עסקים – זה מחדד את היכולת

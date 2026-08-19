@@ -56,7 +56,7 @@ export default function PathSelector() {
             בשבילי.
           </div>
           <p className="relative mt-[14px] text-[16.5px] leading-[1.7] text-paper/66">
-            יש לכם עסק פעיל, צוות ותקציב – ואתם רוצים מישהו שייקח אחריות על ה-Performance.
+            יש לכם עסק פעיל, צוות ותקציב – ואתם רוצים מישהו שייקח אחריות על ה‑Performance.
           </p>
           <span className="relative mt-auto flex items-center gap-[10px] pt-[26px] text-[17px] font-bold text-lime">
             ניהול השיווק שלי{" "}

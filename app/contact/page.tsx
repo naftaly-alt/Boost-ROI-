@@ -26,24 +26,6 @@ export default function ContactPage() {
           <p className="m-0 max-w-[30em] text-[17.5px] leading-[1.8] text-paper/66">
             וואטסאפ זה הכי מהיר. אם נוח לכם בטופס – גם זה מגיע ישר אליי.
           </p>
-          <div className="mt-1 flex flex-wrap justify-center gap-[10px]">
-            <a
-              href="https://www.instagram.com/naftalycohen/"
-              target="_blank"
-              rel="noopener"
-              className="inline-flex min-h-12 items-center rounded-full border border-paper/24 px-5 text-[15px] font-semibold text-paper no-underline hover:border-lime hover:text-paper"
-            >
-              Instagram
-            </a>
-            <a
-              href="https://www.facebook.com/profile.php?id=61563066875491&locale=he_IL"
-              target="_blank"
-              rel="noopener"
-              className="inline-flex min-h-12 items-center rounded-full border border-paper/24 px-5 text-[15px] font-semibold text-paper no-underline hover:border-lime hover:text-paper"
-            >
-              Facebook
-            </a>
-          </div>
         </div>
       </ScrollReveal>
 

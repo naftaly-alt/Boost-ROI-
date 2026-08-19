@@ -193,7 +193,7 @@ export default function HomePage() {
               נפתלי.
             </h2>
             <p className="mt-5 text-[17px] leading-[1.85] text-[#4A4E52]">
-              אני עובד בעולמות השיווק וה-Performance כבר שנים. ניהלתי קמפיינים לעסקים ממגוון תחומים, בניתי תהליכי שיווק,
+              אני עובד בעולמות השיווק וה‑Performance כבר שנים. ניהלתי קמפיינים לעסקים ממגוון תחומים, בניתי תהליכי שיווק,
               עבדתי לצד בעלי עסקים וצוותי מכירות – וגם העברתי סדנאות לבעלי עסקים שרצו להבין איך לעשות את הדברים בעצמם.
             </p>
             <p className="mt-[18px] font-display text-[clamp(19px,2.4vw,26px)] font-extrabold leading-[1.35] tracking-[-.02em]">

@@ -171,9 +171,11 @@ export default function BoostCompanion() {
     }, 3200);
   }, [playOuch, quip, ouch]);
 
-  const showCompanion = !narrow && past;
+  const showCompanion = past;
   const bubbleVisible = quipOn && (!shortView || ouch);
   const bubbleHidden = shortView && !ouch;
+  const iconSize = narrow ? 56 : 74;
+  const bottomOffset = narrow ? "calc(78px + env(safe-area-inset-bottom))" : "26px";
 
   const origin = pathname === "/managed" ? "managed" : pathname === "/self" ? "self" : "contact";
   const waCurrent = waForOrigin(origin);
@@ -182,20 +184,24 @@ export default function BoostCompanion() {
 
   return (
     <>
-      <div className="pointer-events-none fixed bottom-[26px] left-[26px] z-[88] flex max-w-[min(340px,34vw)] items-end gap-3">
+      <div
+        className="pointer-events-none fixed left-[14px] z-[88] flex max-w-[min(220px,52vw)] items-end gap-2 min-[901px]:left-[26px] min-[901px]:max-w-[min(340px,34vw)] min-[901px]:gap-3"
+        style={{ bottom: bottomOffset }}
+      >
         <button
           type="button"
           onClick={poke}
           aria-label="Boost"
-          className={`pointer-events-auto h-[74px] w-[74px] flex-none cursor-pointer border-none bg-transparent p-0 [filter:drop-shadow(0_10px_24px_rgba(0,0,0,0.45))] ${
+          className={`pointer-events-auto flex-none cursor-pointer border-none bg-transparent p-0 [filter:drop-shadow(0_10px_24px_rgba(0,0,0,0.45))] ${
             ouch ? "animate-bouch" : "animate-bfloat"
           }`}
+          style={{ height: iconSize, width: iconSize }}
         >
           <Boost mode={quip.mood} />
         </button>
         {!bubbleHidden && (
           <div
-            className="max-w-[250px] rounded-[18px] rounded-bl-[4px] bg-paper px-4 py-3 text-sm font-semibold leading-[1.5] text-ink shadow-[0_14px_34px_rgba(0,0,0,0.4)] transition-all duration-[400ms] ease-out"
+            className="max-w-[150px] rounded-[18px] rounded-bl-[4px] bg-paper px-3 py-[10px] text-[12.5px] font-semibold leading-[1.45] text-ink shadow-[0_14px_34px_rgba(0,0,0,0.4)] transition-all duration-[400ms] ease-out min-[901px]:max-w-[250px] min-[901px]:px-4 min-[901px]:py-3 min-[901px]:text-sm"
             style={{
               opacity: bubbleVisible ? 1 : 0,
               transform: quipOn ? "none" : "translateY(10px) scale(.96)",
@@ -213,9 +219,10 @@ export default function BoostCompanion() {
         rel="noopener"
         aria-label="דברו איתי בוואטסאפ"
         title="דברו איתי בוואטסאפ"
-        className="fixed bottom-[26px] right-[26px] z-[88] inline-flex h-[62px] w-[62px] items-center justify-center rounded-full bg-lime text-ink shadow-[0_14px_34px_rgba(200,255,77,0.3)] transition-transform duration-200 hover:-translate-y-0.5 hover:scale-[1.04] hover:text-ink"
+        className="fixed right-[16px] z-[88] inline-flex items-center justify-center rounded-full bg-lime text-ink shadow-[0_14px_34px_rgba(200,255,77,0.3)] transition-transform duration-200 hover:-translate-y-0.5 hover:scale-[1.04] hover:text-ink min-[901px]:bottom-[26px] min-[901px]:right-[26px]"
+        style={{ height: iconSize, width: iconSize, bottom: bottomOffset }}
       >
-        <svg viewBox="0 0 24 24" width={30} height={30} fill="#0E1112" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width={narrow ? 26 : 30} height={narrow ? 26 : 30} fill="#0E1112" aria-hidden="true">
           <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm5.8 14.1c-.25.69-1.43 1.32-1.97 1.37-.54.05-1.04.24-3.54-.94-2.5-1.18-4.06-3.84-4.18-4.02-.13-.18-.98-1.42-.94-2.66.04-1.24.71-1.83.96-2.08.25-.25.54-.31.72-.31.18 0 .36 0 .52.01.17.01.4-.06.61.48.21.54.72 1.85.78 1.98.06.13.1.28.01.46-.09.18-.35.51-.5.68-.15.17-.31.26-.13.55.18.29.66 1.06 1.42 1.72.97.85 1.78 1.11 2.06 1.24.28.13.44.11.61-.07.17-.18.71-.83.9-1.11.19-.28.38-.23.63-.14.25.09 1.56.74 1.83.87.27.13.45.2.52.31.06.11.06.68-.19 1.37z" />
         </svg>
       </a>

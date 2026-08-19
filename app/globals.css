@@ -50,3 +50,27 @@
     transition: none !important;
   }
 }
+
+/* Accessibility widget toggles */
+html.a11y-font-lg {
+  zoom: 1.15;
+}
+html.a11y-font-xl {
+  zoom: 1.3;
+}
+html.a11y-contrast {
+  filter: invert(1) hue-rotate(180deg);
+}
+html.a11y-contrast img,
+html.a11y-contrast video {
+  filter: invert(1) hue-rotate(180deg);
+}
+html.a11y-no-motion *,
+html.a11y-no-motion *::before,
+html.a11y-no-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
+html.a11y-underline a {
+  text-decoration: underline !important;
+}

@@ -4,10 +4,10 @@ import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import MobileBottomBar from "@/components/MobileBottomBar";
 import BoostCompanion from "@/components/BoostCompanion";
 import ScrollProgress from "@/components/ScrollProgress";
 import PixelRouteTracker from "@/components/PixelRouteTracker";
+import AccessibilityWidget from "@/components/AccessibilityWidget";
 import { SITE_TITLE, SITE_DESCRIPTION } from "@/lib/meta";
 import { META_PIXEL_ID } from "@/lib/tracking";
 
@@ -72,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main>{children}</main>
         <BoostCompanion />
         <Footer />
-        <MobileBottomBar />
+        <AccessibilityWidget />
       </body>
     </html>
   );
